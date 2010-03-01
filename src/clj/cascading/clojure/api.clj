@@ -80,39 +80,31 @@
 ;   no default, error if missing
 ; out-fields: subset of (union in-fields func-fields) that flow out of the pipe
   ;   defaults to func-fields
-(defn- parse-func [func-obj]
-"func-obj =>
- #'func
- [#'func]
- [override-fields #'func]
- [#'func & params]
- [override-fields #'func & params]"
-(let [func-obj    (collectify func-obj)
-      i           (idx-of-first func-obj var?)]
-  (assert (<= i 1))
-  (let [spec        (fn-spec (drop i func-obj))
-        func-var    (nth func-obj i)
-        func-fields (or (and (= i 1) (clojure.core/first func-obj))
-                        (:fields (meta func-var)))]
-    [(fields func-fields) spec])))
 
-(defn- parse-args
-  "arr =>
-  [func-obj]
-  [in-fields func-obj]
-  [in-fields func-obj out-fields]
-  [func-obj out-fields]"
+(defn parse-args
+  "
+  arr => func-spec in-fields? :fn> func-fields :> out-fields
+  
+  returns [in-fields func-fields spec out-fields]
+  "
   ([arr] (parse-args arr Fields/RESULTS))
   ([arr defaultout]
-  (let [i (idx-of-first arr (complement fields-obj?))]
-    (assert (<= i 1))
-    (let [in-fields          (if (= i 1)
-                               (fields (clojure.core/first arr))
-                               Fields/ALL)
-          [func-fields spec] (parse-func (nth arr i))
-          out-fields         (if (< i (dec (clojure.core/count arr)))
-                               (fields (last arr)) defaultout)]
-    [in-fields func-fields spec out-fields]))))
+     (let
+       [func-args           (clojure.core/first arr)
+        varargs             (rest arr)
+        spec                (fn-spec func-args)
+        func-var            (if (var? func-args) func-args (clojure.core/first func-args))
+                              first-elem (clojure.core/first varargs)
+        [in-fields keyargs] (if (or (nil? first-elem)
+                                    (keyword? first-elem))
+                                  [Fields/ALL (apply hash-map varargs)]
+                                  [(fields (clojure.core/first varargs))
+                                   (apply hash-map (rest varargs))])
+        options             (merge {:fn> (:fields (meta func-var)) :> defaultout} keyargs)
+        result              [in-fields (fields (:fn> options)) spec (fields (:> options))]]
+
+        (println arr result) result )))
+
 
 (defn- uuid []
   (str (UUID/randomUUID)))
@@ -176,6 +168,79 @@
   	  (fields-array fields-seq)
   	  (fields declared-fields)
   	  joiner)))
+
+
+; (comment
+; (defmapop name [...] ... -> not HOF no declared fields)
+; (defmapop name arg2 [...] ... -> not HOF, declared fields)
+; (defmapop [name args-vec] [...] ... -> HOF, no declared fields)
+; (defmapop [name args-vec] arg2 [...] ... -> HOF, declared fields)
+; )
+; (defmapop [insert [val]] []
+;   val)
+; 
+; (insert 1 :fn> "value" :> Fields/ALL)
+; 
+; (comment
+; (c/map #'myfunc "hello" :fn> "func-out" :> ["hello" "func-out"])
+; 
+;   )
+; 
+; (defmapop [insert [a]] []
+;   a)
+; -->
+; (defn insert__ [a]
+;   (fn [] a))
+; 
+; (defn insert [[a] & args]
+;   (apply c/map [#'insert__ a] args))
+; 
+; (defmapop expand-data ["pedigree" "dataunit"]
+;   [data]
+;   [(.getPedigree data) (.getDataUnit data)])
+;  -->
+; (defn expand-data__ [data]
+;   [(.getPedigree data) (.getDataUnit data)] )
+; 
+; (defn expand-data [& args]
+;   (apply c/map #'expand-data__ args)
+;   )
+
+(defn- defop-helper [type spec declared-fields bindings code]
+  (let  [[name func-args] (if (sequential? spec)
+                          [(clojure.core/first spec) (second spec)]
+                          [spec nil])
+         runner-name (symbol (str name "__"))
+         func-form (if (nil? func-args) `(var ~runner-name) `[(var ~runner-name) ~@func-args])
+         args-sym (gensym "args")
+         runner-body (if (nil? func-args) `(~bindings ~code) `(~func-args (fn ~bindings ~code)))
+         assembly-args (if (nil? func-args) `[ & ~args-sym] `[~func-args & ~args-sym])
+        ]
+  `(do
+    (defn ~runner-name {:fields ~declared-fields} ~@runner-body)
+    (defn ~name ~assembly-args
+      (apply ~type ~func-form ~args-sym)
+      ))))
+
+(defmacro defmapop
+  ([spec bindings code] (defmapop spec nil bindings code))
+  ([spec declared-fields bindings code]
+    (defop-helper 'cascading.clojure.api/map spec declared-fields bindings code)))
+
+(defmacro defmapcatop
+  ([spec bindings code] (defmapcatop spec nil bindings code))
+  ([spec declared-fields bindings code]
+    (defop-helper 'cascading.clojure.api/mapcat spec declared-fields bindings code)))
+
+(defmacro deffilterop
+  ([spec bindings code] (deffilterop spec nil bindings code))
+  ([spec declared-fields bindings code]
+    (defop-helper 'cascading.clojure.api/filter spec declared-fields bindings code)))
+
+(defmacro defaggregateop
+  ([spec bindings code] (defaggregateop spec nil bindings code))
+  ([spec declared-fields bindings code]
+    (defop-helper 'cascading.clojure.api/aggregate spec declared-fields bindings code)))
 
 
 (defn assemble

@@ -97,6 +97,27 @@
   (with-open [it (.openForRead sink (JobConf.))]
        (doall (map #(Util/coerceFromTuple (Tuple. (.getTuple %))) (iterator-seq it)))))
 
+
+; (defn- normalize-test-data [data]
+;   (letfn
+;     [(normalize-helper [item]
+;       (if (sequential? item))
+;     )]
+;     )
+;   "
+;   ['word' ['a' 'b' 'c']]
+;   [['word'] ['a' 'b' 'c']]
+;   [[['word'] ['a' 'b' 'c']]]
+;   [['word' ['a' 'b' 'c']]]
+;   [[['word'] [['a'] ['b'] ['c']]] [['field1' 'field2'] [['a' '1'] ['b' '2'] ['c' '3']]]]
+;   
+;   look down first elem until last one where you have a pair where the second is a vector
+;   first will be fields, second will be data for that source. just need to determine how far down is the 
+;   last 
+;   -> return [fields data]
+;   "
+;   )
+
 ;; source-data is a vector of [fields data-vector], i.e. [["field1", "field2"], [[1, 2] [2, 3] [3, 4]]]
 ;; sink-data is a vector of [fields data-vector], i.e. [["field1", "field2"], [[1, 2] [2, 3] [3, 4]]]
 (defn test-flow [source-data assembly sink-data]
