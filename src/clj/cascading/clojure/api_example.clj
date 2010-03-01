@@ -18,8 +18,8 @@
 ; (defn uppercase [word]
 ;   (.toUpperCase word))
 
-(c/deffilterop starts-with-b? [word]
-  (re-find #"^b.*" word))
+(c/deffilterop [starts-with? [s]] [word]
+  (re-find (re-pattern (str "^" s ".*")) word))
 
 (c/defmapcatop split-words "word" [line]
   (re-seq #"\w+" line))
@@ -29,7 +29,7 @@
 
 (c/defassembly example-assembly [phrase white]
   [phrase (phrase (split-words "line")
-                  (starts-with-b?)
+                  (starts-with? ["b"])
                   (c/group-by "word")
                   (c/count "count"))
    white (white (split-words "line" :fn> "white"))]

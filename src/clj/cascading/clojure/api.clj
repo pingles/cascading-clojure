@@ -103,7 +103,7 @@
         options             (merge {:fn> (:fields (meta func-var)) :> defaultout} keyargs)
         result              [in-fields (fields (:fn> options)) spec (fields (:> options))]]
 
-        (println arr result) result )))
+        result )))
 
 
 (defn- uuid []
