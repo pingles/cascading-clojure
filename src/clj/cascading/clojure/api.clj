@@ -151,8 +151,17 @@
   (fn [previous]
     (Each. previous (fields keep-fields) (Identity.))))
 
-;; we shouldn't need a seq for fields
+(defn raw-each
+  ([arg1] (fn [p] (Each. p arg1)))
+  ([arg1 arg2] (fn [p] (Each. p arg1 arg2)))
+  ([arg1 arg2 arg3] (fn [p] (Each. p arg1 arg2 arg3))))
 
+(defn raw-every
+  ([arg1] (fn [p] (Every. p arg1)))
+  ([arg1 arg2] (fn [p] (Every. p arg1 arg2)))
+  ([arg1 arg2 arg3] (fn [p] (Every. p arg1 arg2 arg3))))
+
+;; we shouldn't need a seq for fields
 (defn aggregate [args]
   (fn [#^Pipe previous]
   (let [[#^Fields in-fields func-fields specs #^Fields out-fields] (parse-args args)]
