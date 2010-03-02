@@ -169,43 +169,6 @@
   	  (fields declared-fields)
   	  joiner)))
 
-
-; (comment
-; (defmapop name [...] ... -> not HOF no declared fields)
-; (defmapop name arg2 [...] ... -> not HOF, declared fields)
-; (defmapop [name args-vec] [...] ... -> HOF, no declared fields)
-; (defmapop [name args-vec] arg2 [...] ... -> HOF, declared fields)
-; )
-; (defmapop [insert [val]] []
-;   val)
-; 
-; (insert 1 :fn> "value" :> Fields/ALL)
-; 
-; (comment
-; (c/map #'myfunc "hello" :fn> "func-out" :> ["hello" "func-out"])
-; 
-;   )
-; 
-; (defmapop [insert [a]] []
-;   a)
-; -->
-; (defn insert__ [a]
-;   (fn [] a))
-; 
-; (defn insert [[a] & args]
-;   (apply c/map [#'insert__ a] args))
-; 
-; (defmapop expand-data ["pedigree" "dataunit"]
-;   [data]
-;   [(.getPedigree data) (.getDataUnit data)])
-;  -->
-; (defn expand-data__ [data]
-;   [(.getPedigree data) (.getDataUnit data)] )
-; 
-; (defn expand-data [& args]
-;   (apply c/map #'expand-data__ args)
-;   )
-
 (defn- defop-helper [type spec declared-fields bindings code]
   (let  [[name func-args] (if (sequential? spec)
                           [(clojure.core/first spec) (second spec)]

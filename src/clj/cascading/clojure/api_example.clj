@@ -35,7 +35,7 @@
    white (white (split-words "line" :fn> "white"))]
    ([phrase white] (c/inner-join ["word" "white"] ["word" "count" "white"])
                    (c/select ["word" "count"])
-                 (uppercase "word" :fn> "upword" :> ["upword" "count"])))
+                 (uppercase "word" :fn> "upword" :> ["upword" "count"] )))
 
 
 (defn run-example
