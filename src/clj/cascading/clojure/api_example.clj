@@ -18,6 +18,12 @@
 ; (defn uppercase [word]
 ;   (.toUpperCase word))
 
+(c/defmapop [insert [v]] "val" [& _]
+  v )
+
+(c/defbufferop my-sum "count" [numbers]
+  [(reduce + (map first numbers))])
+
 (c/deffilterop [starts-with? [s]] [word]
   (re-find (re-pattern (str "^" s ".*")) word))
 
@@ -27,25 +33,32 @@
 (c/defmapop uppercase [word]
   (.toUpperCase word))
 
-(c/defassembly example-assembly [phrase white]
-  [phrase (phrase (split-words "line")
-                  (starts-with? ["b"])
-                  (c/group-by "word")
-                  (c/count "count"))
-   white (white (split-words "line" :fn> "white"))]
-   ([phrase white] (c/inner-join ["word" "white"] ["word" "count" "white"])
-                   (c/select ["word" "count"])
-                 (uppercase "word" :fn> "upword" :> ["upword" "count"] )))
+;(c/defassembly example-assembly [phrase white]
+;  [phrase (phrase (split-words "line")
+;                  (starts-with? ["b"])
+;                  (c/group-by "word")
+;                  (c/count "count"))
+;   white (white (split-words "line" :fn> "white"))]
+;   ([phrase white] (c/inner-join ["word" "white"] ["word" "count" "white"])
+;                   (c/select ["word" "count"])
+;                 (uppercase "word" :fn> "upword" :> ["upword" "count"] )))
+
+(c/defassembly example-assembly [words]
+    (words (split-words "line")
+           (insert [1] :fn> "val" :> ["word" "val"])
+           (c/group-by "word")
+           (my-sum "val" :fn> "count")
+           (c/select ["word" "count"])))
 
 
 (defn run-example
   [in-phrase-dir-path in-white-dir-path out-dir-path]
   (let [source-scheme  (c/text-line "line")
-        sink-scheme    (c/text-line ["upword" "count"])
+        sink-scheme    (c/text-line ["word" "count"])
         phrase-source  (c/hfs-tap source-scheme in-phrase-dir-path)
-        white-source   (c/hfs-tap source-scheme in-white-dir-path)
+;        white-source   (c/hfs-tap source-scheme in-white-dir-path)
         sink           (c/hfs-tap sink-scheme out-dir-path)
-        flow           (c/mk-flow [phrase-source white-source] sink example-assembly)]
+        flow           (c/mk-flow [phrase-source] sink example-assembly)]
     (c/exec flow)))
 
 

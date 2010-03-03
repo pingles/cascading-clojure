@@ -18,7 +18,7 @@
                                      OutputCollector JobConf)
            (java.util Properties Map UUID)
            (cascading.clojure ClojureFilter ClojureMapcat ClojureMap
-                              ClojureAggregator Util)
+                              ClojureAggregator Util ClojureBuffer)
            (clojure.lang Var)
            (java.io File)
            (java.lang RuntimeException Comparable)))
@@ -135,9 +135,13 @@
     (Each. previous in-fields
       (ClojureMap. func-fields spec) out-fields))))
 
-(defn group-by [group-fields]
-  (fn [previous]
-    (GroupBy. previous (fields group-fields))))
+(defn group-by
+  ([group-fields]
+    (fn [previous] (GroupBy. previous (fields group-fields))))
+  ([group-fields sort-fields]
+    (fn [previous] (GroupBy. previous (fields group-fields) (fields sort-fields))))
+  ([group-fields sort-fields reverse-order]
+    (fn [previous] (GroupBy. previous (fields group-fields) (fields sort-fields) reverse-order))))
 
 (defn count [#^String count-fields]
   (fn [previous]
@@ -162,11 +166,18 @@
   ([arg1 arg2 arg3] (fn [p] (Every. p arg1 arg2 arg3))))
 
 ;; we shouldn't need a seq for fields
-(defn aggregate [args]
+(defn aggregate [& args]
   (fn [#^Pipe previous]
-  (let [[#^Fields in-fields func-fields specs #^Fields out-fields] (parse-args args)]
+  (let [[#^Fields in-fields func-fields specs #^Fields out-fields] (parse-args args Fields/ALL)]
     (Every. previous in-fields
       (ClojureAggregator. func-fields specs) out-fields))))
+
+(defn buffer [& args]
+  (fn [#^Pipe previous]
+    (let [[#^Fields in-fields func-fields specs #^Fields out-fields] (parse-args args Fields/ALL)]
+      (Every. previous in-fields
+        (ClojureBuffer. func-fields specs) out-fields))))
+
 
 ;; we shouldn't need a seq for fields (b/c we know how many pipes we have)
 (defn co-group
@@ -214,6 +225,10 @@
   ([spec declared-fields bindings code]
     (defop-helper 'cascading.clojure.api/aggregate spec declared-fields bindings code)))
 
+(defmacro defbufferop
+  ([spec bindings code] (defbufferop spec nil bindings code))
+  ([spec declared-fields bindings code]
+    (defop-helper 'cascading.clojure.api/buffer spec declared-fields bindings code)))
 
 (defn assemble
   ([x] x)
