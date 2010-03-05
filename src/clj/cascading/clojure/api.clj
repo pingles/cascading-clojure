@@ -70,8 +70,6 @@
     (string? obj)
     (and (sequential? obj) (every? string? obj))))
 
-(defn- idx-of-first [aseq pred]
-  (clojure.core/first (find-first #(pred (last %)) (indexed aseq))))
 
 ; in-fields: subset of fields from incoming pipe that are passed to function
 ;   defaults to all
@@ -117,6 +115,12 @@
   ([#^String name]
    (Pipe. name)))
 
+(defn- as-pipes
+  [pipe-or-pipes]
+  (let [pipes (if (instance? Pipe pipe-or-pipes)
+[pipe-or-pipes] pipe-or-pipes)]
+  (into-array Pipe pipes)))
+
 (defn filter [& args]
   (fn [previous]
     (let [[in-fields _ spec _] (parse-args args)]
@@ -137,11 +141,11 @@
 
 (defn group-by
   ([group-fields]
-    (fn [previous] (GroupBy. previous (fields group-fields))))
+    (fn [previous] (GroupBy. (as-pipes previous) (fields group-fields))))
   ([group-fields sort-fields]
-    (fn [previous] (GroupBy. previous (fields group-fields) (fields sort-fields))))
+    (fn [previous] (GroupBy. (as-pipes previous) (fields group-fields) (fields sort-fields))))
   ([group-fields sort-fields reverse-order]
-    (fn [previous] (GroupBy. previous (fields group-fields) (fields sort-fields) reverse-order))))
+    (fn [previous] (GroupBy. (as-pipes previous) (fields group-fields) (fields sort-fields) reverse-order))))
 
 (defn count [#^String count-fields]
   (fn [previous]
