@@ -141,11 +141,11 @@
 
 (defn group-by
   ([group-fields]
-    (fn [previous] (GroupBy. (as-pipes previous) (fields group-fields))))
+    (fn [& previous] (GroupBy. (as-pipes previous) (fields group-fields))))
   ([group-fields sort-fields]
-    (fn [previous] (GroupBy. (as-pipes previous) (fields group-fields) (fields sort-fields))))
+    (fn [& previous] (GroupBy. (as-pipes previous) (fields group-fields) (fields sort-fields))))
   ([group-fields sort-fields reverse-order]
-    (fn [previous] (GroupBy. (as-pipes previous) (fields group-fields) (fields sort-fields) reverse-order))))
+    (fn [& previous] (GroupBy. (as-pipes previous) (fields group-fields) (fields sort-fields) reverse-order))))
 
 (defn count [#^String count-fields]
   (fn [previous]
