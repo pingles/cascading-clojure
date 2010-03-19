@@ -235,7 +235,7 @@
        (.setProperty props k v))
      (let [flow-connector (FlowConnector. props)]
        (try
-         (.connect flow-connector source-map sink pipe)
+         (.connect flow-connector (uuid) source-map sink pipe)
          (catch cascading.flow.PlannerException e
            (.writeDOT e "exception.dot")
            (throw (RuntimeException.
