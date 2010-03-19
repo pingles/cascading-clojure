@@ -1,7 +1,7 @@
 (ns cascading.clojure.api
-  (:refer-clojure :exclude (count first filter mapcat map))
-  (:use [clojure.contrib.seq-utils :only (find-first indexed)]
-        (cascading.clojure parse))
+  (:refer-clojure :exclude (count first last filter mapcat map))
+  (:use [clojure.contrib.seq-utils :only (find-first indexed)])
+  (:use cascading.clojure.parse)
   (:require [clj-json.core :as json])
   (:import (cascading.tuple Tuple TupleEntry Fields)
            (cascading.scheme TextLine)
@@ -9,7 +9,7 @@
            (cascading.operation Identity)
            (cascading.operation.filter Limit)
            (cascading.operation.regex RegexGenerator RegexFilter)
-           (cascading.operation.aggregator First Count)
+           (cascading.operation.aggregator First Last Count)
            (cascading.pipe Pipe Each Every GroupBy CoGroup)
            (cascading.pipe.cogroup InnerJoin OuterJoin
                                    LeftJoin RightJoin MixedJoin)
@@ -114,6 +114,12 @@
    (Every. previous (First.)))
   ([#^Pipe previous in-fields]
    (Every. previous (fields in-fields) (First.))))
+
+(defn last
+  ([#^Pipe previous]
+   (Every. previous (Last.)))
+  ([#^Pipe previous in-fields]
+   (Every. previous (fields in-fields) (Last.))))
 
 (defn count [#^Pipe previous #^String count-fields]
   (Every. previous
