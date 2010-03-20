@@ -8,7 +8,6 @@
            (cascading.flow Flow FlowConnector)
            (cascading.operation Identity)
            (cascading.operation.filter Limit)
-           (cascading.operation.regex RegexGenerator RegexFilter)
            (cascading.operation.aggregator First Last Count)
            (cascading.pipe Pipe Each Every GroupBy CoGroup)
            (cascading.pipe.cogroup InnerJoin OuterJoin
