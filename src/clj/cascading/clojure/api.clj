@@ -40,12 +40,14 @@
   (str (UUID/randomUUID)))
 
 (defn pipe
-  "Returns a Pipe of the given name, or if one is not supplied with a
-   unique random name."
+  "Returns a new Pipe with a unique random name or a given name, or returns a
+   given pipe with a given new name."
   ([]
    (Pipe. (uuid)))
   ([#^String name]
-   (Pipe. name)))
+   (Pipe. name))
+  ([previous name]
+   (Pipe. name previous)))
 
 (defn ensure-pipe
   "Ensures that the argument is a pipe and returns it, with an appropriate

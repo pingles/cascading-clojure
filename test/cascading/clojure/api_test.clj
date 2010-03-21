@@ -45,15 +45,20 @@
     (is (instance? Fields f2))
     (is (= `("foo" "bar") (seq f2)))))
 
-(deftest test-uuid-pipe
+(deftest pipe-uuid
   (let [up (c/pipe)]
     (is (instance? Pipe up))
     (is (= 36 (.length (.getName up))))))
 
-(deftest test-named-pipe
+(deftest pipe-named
   (let [np (c/pipe "foo")]
     (is (instance? Pipe np))
     (is (= "foo" (.getName np)))))
+
+(deftest pipe-renamed
+  (let [p  (c/pipe "foo")
+        np (c/pipe p "bar")]
+    (is (= "bar" (.getName np)))))
 
 (deftest test-ensure-pipe
   (let [p (c/pipe "foo")]
