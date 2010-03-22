@@ -128,4 +128,4 @@
             sink-tap       (c/lfs-tap (c/text-line "line") sink-path)
             flow           (c/flow source-tap-map sink-tap assembly)
             out-tuples     (line-sink-seq (.openSink (c/exec flow)))]
-  (is (= expected-out-tuples out-tuples))))))
+        (is (= expected-out-tuples out-tuples))))))
