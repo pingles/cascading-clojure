@@ -6,10 +6,10 @@
   (:import (cascading.tuple Fields)
            (cascading.pipe Pipe)
            (cascading.clojure Util ClojureMap))
-  (:require (clj-json [core :as json]))
+  (:require [org.danlarkin.json :as json])
   (:require [clojure.contrib.duck-streams :as ds])
   (:require [clojure.contrib.java-utils :as ju])
-  (:require (cascading.clojure [api :as c])))
+  (:require [cascading.clojure.api :as c]))
 
 (defn uppercase
   {:fn> "upword"}
@@ -54,45 +54,26 @@
     [["bar" 6] ["bat" 3]]))
 
 (defn transform
-  {:fn> ["up-name" "inc-age-data"]}
-  [name data]
-  [(.toUpperCase name) (update-in data ["age"] inc)])
+  [input]
+  [(.toUpperCase (:name input)) (inc (get-in input [:age-data :age]))])
 
-(deftest json-map-line-test
+(deftest json-line-test
   (with-log-level :warn
     (with-tmp-files [source (temp-dir "source")
                      sink   (temp-path "sink")]
-      (let [lines [{"name" "foo" "age-data" {:age 23}}
-                   {"name" "bar" "age-data" {:age 14}}]]
-        (write-lines-in source "source.data" (map json/generate-string lines))
+      (let [lines [{:name "foo" :age-data {:age 23}}
+                   {:name "bar" :age-data {:age 14}}]]
+        (write-lines-in source "source.data" (map json/encode-to-str lines))
         (let [trans (-> (c/pipe "j")
-                      (c/map #'transform :< ["name" "age-data"])
+                      (c/map #'transform
+                        :< ["input"]
+                        :fn> ["up-name" "inc-age-data"])
                       (c/group-by "up-name")
                       (c/first "inc-age-data"))
               flow (c/flow
-                     {"j" (c/lfs-tap (c/json-map-line ["name" "age-data"]) source)}
-                     (c/lfs-tap (c/json-map-line ["up-name" "inc-age-data"]) sink)
+                     {"j" (c/lfs-tap (c/json-line "input") source)}
+                     (c/lfs-tap (c/json-line) sink)
                      trans)]
          (c/exec flow)
-         (is (= "{\"inc-age-data\":{\"age\":15},\"up-name\":\"BAR\"}\n{\"inc-age-data\":{\"age\":24},\"up-name\":\"FOO\"}\n"
+         (is (= "[\"BAR\",15]\n[\"FOO\",24]\n"
                 (ds/slurp* (ju/file sink "part-00000")))))))))
-
-(defn nested-transform
-  {:fn> ["up-bar"]}
-  [foo]
-  [(.toUpperCase (foo "bar"))])
-
-(deftest nested-json-map-line-test
-  (with-log-level :warn
-    (with-tmp-files [source (temp-dir "source")
-                     sink   (temp-path "sink")]
-    (let [lines [{"foo" {"bar" "baz"}}]]
-      (write-lines-in source "source.data" (map json/generate-string lines))
-      (let [trans (-> (c/pipe "j") (c/map #'nested-transform :< ["foo"]))
-            flow (c/flow
-                  {"j" (c/lfs-tap (c/json-map-line ["foo"]) source)}
-                  (c/lfs-tap (c/json-map-line ["up-bar"]) sink)
-                  trans)]
-        (c/exec flow)
-        (is (= "{\"up-bar\":\"BAZ\"}\n"
-               (ds/slurp* (ju/file sink "part-00000")))))))))

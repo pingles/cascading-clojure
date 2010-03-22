@@ -4,10 +4,9 @@
   (:import (cascading.tuple Fields)
            (cascading.pipe Pipe)
            (cascading.clojure Util ClojureMap))
-  (:require (clj-json [core :as json]))
   (:require [clojure.contrib.duck-streams :as ds])
   (:require [clojure.contrib.java-utils :as ju])
-  (:require (cascading.clojure [api :as c])))
+  (:require [cascading.clojure.api :as c]))
 
 ;;notes - self joining requires duplicationg a tap pointed at the same source.
 

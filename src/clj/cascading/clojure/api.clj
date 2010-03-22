@@ -2,7 +2,7 @@
   (:refer-clojure :exclude (count first last filter mapcat map))
   (:use [clojure.contrib.seq-utils :only (find-first indexed)])
   (:use cascading.clojure.parse)
-  (:require [clj-json.core :as json])
+  (:require [org.danlarkin.json :as json])
   (:import (cascading.tuple Tuple TupleEntry Fields)
            (cascading.scheme TextLine)
            (cascading.flow Flow FlowConnector)
@@ -14,7 +14,7 @@
                                    LeftJoin RightJoin MixedJoin)
            (cascading.scheme Scheme)
            (cascading.tap Hfs Lfs Tap)
-           (cascading.cascade Cascade)
+           (cascading.cascade Cascade CascadeConnector)
            (org.apache.hadoop.io Text)
            (org.apache.hadoop.mapred TextInputFormat TextOutputFormat
                                      OutputCollector JobConf)
@@ -188,10 +188,8 @@
  ([field-names]
   (TextLine. (fields field-names) (fields field-names))))
 
-(defn json-map-line
-  [json-keys]
-  (let [json-keys-arr (into-array json-keys)
-        scheme-fields (fields json-keys)]
+(defn json-line [& field-name]
+  (let [scheme-fields (fields (or field-name Fields/FIRST))]
     (proxy [Scheme] [scheme-fields scheme-fields]
       (sourceInit [tap #^JobConf conf]
         (.setInputFormat conf TextInputFormat))
@@ -201,19 +199,11 @@
           (.setOutputValueClass Text)
           (.setOutputFormat TextOutputFormat)))
       (source [_ #^Text json-text]
-        (let [json-map  (json/parse-string (.toString json-text))
-              json-vals (clojure.core/map json-map json-keys-arr)]
-          (Util/coerceToTuple json-vals)))
+        (let [json-str (.toString json-text)]
+          (Util/coerceToTuple [(json/decode-from-str json-str)])))
       (sink [#^TupleEntry tuple-entry #^OutputCollector output-collector]
-        (let [elems     (Util/coerceArrayFromTuple
-                          (.selectTuple tuple-entry scheme-fields))
-              json-map  (reduce
-                          (fn [m i]
-                            (assoc m (aget json-keys-arr i)
-                                     (aget elems i)))
-                          {}
-                          (range (alength json-keys-arr)))
-              json-str  (json/generate-string json-map)]
+        (let [elems (Util/coerceFromTuple (.getTuple tuple-entry))
+              json-str (json/encode-to-str elems)]
           (.collect output-collector nil (Tuple. json-str)))))))
 
 (defn path
@@ -255,8 +245,8 @@
   (doto flow .start .complete))
 
 (defn cascade  [& args]
-  (let [casc (cascading.cascade.CascadeConnector.)]
+  (let [casc (CascadeConnector.)]
     (.connect casc (into-array args))))
 
-(defn run-cascade [#^Cascade c]
+(defn exec-cascade [#^Cascade c]
   (.run c))

@@ -4,8 +4,8 @@
   (:import (cascading.tuple Fields)
            (cascading.pipe Pipe)
            (cascading.clojure Util ClojureMap))
-  (:require [clj-json.core :as json]
-            (clojure.contrib [duck-streams :as ds] [java-utils :as ju])
+  (:require [clojure.contrib.duck-streams :as ds]
+            [clojure.contrib.java-utils :as ju]
             [cascading.clojure.api :as c]))
 
 (defn- max-by [keyfn coll]
