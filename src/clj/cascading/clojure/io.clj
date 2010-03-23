@@ -1,7 +1,8 @@
 (ns cascading.clojure.io
   (:import (java.io File)
            (java.util UUID)
-           (org.apache.log4j Logger Level))
+           (org.apache.log4j Logger Level)
+           (clojure.lang Keyword))
   (:use clojure.contrib.java-utils
         clojure.contrib.duck-streams)
   (:require [clj-json.core :as json]))
@@ -11,7 +12,8 @@
 
 (defn keyify [m]
   (if (map? m)
-    (reduce (fn [i [k v]] (assoc i (keyword k) (keyify v))) {} m)
+    (reduce (fn [i [#^String k v]]
+              (assoc i (Keyword/intern k) (keyify v))) {} m)
     m))
 
 (defn decode-json [obj]
