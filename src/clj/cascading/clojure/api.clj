@@ -1,8 +1,8 @@
 (ns cascading.clojure.api
   (:refer-clojure :exclude (count first last filter mapcat map))
   (:use [clojure.contrib.seq-utils :only (find-first indexed)])
+  (:use [cascading.clojure.io :only (decode-json encode-json)])
   (:use cascading.clojure.parse)
-  (:require [org.danlarkin.json :as json])
   (:import (cascading.tuple Tuple TupleEntry Fields)
            (cascading.scheme TextLine)
            (cascading.flow Flow FlowConnector)
@@ -200,10 +200,10 @@
           (.setOutputFormat TextOutputFormat)))
       (source [_ #^Text json-text]
         (let [json-str (.toString json-text)]
-          (Util/coerceToTuple [(json/decode-from-str json-str)])))
+          (Util/coerceToTuple [(decode-json json-str)])))
       (sink [#^TupleEntry tuple-entry #^OutputCollector output-collector]
         (let [elem (Util/coerceFromTupleElem (.get tuple-entry 0))
-              json-str (json/encode-to-str elem)]
+              json-str (encode-json elem)]
           (.collect output-collector nil (Tuple. json-str)))))))
 
 (defn path

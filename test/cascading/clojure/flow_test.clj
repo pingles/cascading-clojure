@@ -6,7 +6,6 @@
   (:import (cascading.tuple Fields)
            (cascading.pipe Pipe)
            (cascading.clojure Util ClojureMap))
-  (:require [org.danlarkin.json :as json])
   (:require [clojure.contrib.duck-streams :as ds])
   (:require [clojure.contrib.java-utils :as ju])
   (:require [cascading.clojure.api :as c]))
@@ -63,7 +62,7 @@
                      sink   (temp-path "sink")]
       (let [lines [{:name "foo" :age-data {:age 23}}
                    {:name "bar" :age-data {:age 14}}]]
-        (write-lines-in source "source.data" (map json/encode-to-str lines))
+        (write-lines-in source "source.data" (map encode-json lines))
         (let [trans (-> (c/pipe "j")
                       (c/map #'transform
                         :< "input"

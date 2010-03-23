@@ -3,7 +3,19 @@
            (java.util UUID)
            (org.apache.log4j Logger Level))
   (:use clojure.contrib.java-utils
-        clojure.contrib.duck-streams))
+        clojure.contrib.duck-streams)
+  (:require [clj-json.core :as json]))
+
+(def encode-json
+  json/generate-string)
+
+(defn keyify [m]
+  (if (map? m)
+    (reduce (fn [i [k v]] (assoc i (keyword k) (keyify v))) {} m)
+    m))
+
+(defn decode-json [obj]
+  (keyify (json/parse-string obj)))
 
 (defn temp-path [sub-path]
    (file (System/getProperty "java.io.tmpdir") sub-path))
