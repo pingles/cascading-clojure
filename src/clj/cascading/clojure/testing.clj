@@ -8,7 +8,7 @@
            (cascading.flow FlowProcess)
            (cascading.clojure Util ClojureMap)
            (clojure.lang IPersistentCollection))
-  (:require (cascading.clojure [api :as c])))
+  (:require [cascading.clojure.api :as c]))
 
 (defn- roundtrip [obj]
   (cascading.util.Util/deserializeBase64

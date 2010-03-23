@@ -38,16 +38,19 @@ public class Util {
     }
   }
   
- public static Object[] coerceArrayFromTuple(Tuple tuple) {
+  public static Object coerceFromTupleElem(Comparable comp_elem) {
+    if (comp_elem instanceof ClojureWrapper) {
+      return ((ClojureWrapper)comp_elem).toClojure();
+    } else {
+      return comp_elem;
+    }
+  }
+
+  public static Object[] coerceArrayFromTuple(Tuple tuple) {
     int s = tuple.size();
     Object[] obj_elems = new Object[s];
     for (int i= 0; i < s; i++) {
-      Comparable comp_elem = tuple.get(i);
-      if (comp_elem instanceof ClojureWrapper) {
-        obj_elems[i] = ((ClojureWrapper)comp_elem).toClojure();
-      } else {
-        obj_elems[i] = comp_elem;
-      }
+      obj_elems[i] = coerceFromTupleElem((Comparable) tuple.get(i));
     }
     return obj_elems;
   }

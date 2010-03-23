@@ -202,8 +202,8 @@
         (let [json-str (.toString json-text)]
           (Util/coerceToTuple [(json/decode-from-str json-str)])))
       (sink [#^TupleEntry tuple-entry #^OutputCollector output-collector]
-        (let [elems (Util/coerceFromTuple (.getTuple tuple-entry))
-              json-str (json/encode-to-str elems)]
+        (let [elem (Util/coerceFromTupleElem (.get tuple-entry 0))
+              json-str (json/encode-to-str elem)]
           (.collect output-collector nil (Tuple. json-str)))))))
 
 (defn path

@@ -55,7 +55,7 @@
 
 (defn transform
   [input]
-  [(.toUpperCase (:name input)) (inc (get-in input [:age-data :age]))])
+  [[(.toUpperCase (:name input)) (inc (get-in input [:age-data :age]))]])
 
 (deftest json-line-test
   (with-log-level :warn
@@ -66,14 +66,12 @@
         (write-lines-in source "source.data" (map json/encode-to-str lines))
         (let [trans (-> (c/pipe "j")
                       (c/map #'transform
-                        :< ["input"]
-                        :fn> ["up-name" "inc-age-data"])
-                      (c/group-by "up-name")
-                      (c/first "inc-age-data"))
+                        :< "input"
+                        :fn> "output"))
               flow (c/flow
                      {"j" (c/lfs-tap (c/json-line "input") source)}
                      (c/lfs-tap (c/json-line) sink)
                      trans)]
          (c/exec flow)
-         (is (= "[\"BAR\",15]\n[\"FOO\",24]\n"
+         (is (= "[\"FOO\",24]\n[\"BAR\",15]\n"
                 (ds/slurp* (ju/file sink "part-00000")))))))))
