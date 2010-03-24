@@ -204,7 +204,7 @@
       (sink [#^TupleEntry tuple-entry #^OutputCollector output-collector]
         (let [elem (Util/coerceFromTupleElem (.get tuple-entry 0))
               ser-str (serialize elem)]
-          (.collect output-collector nil (Tuple. ser-str)))))))
+          (.collect output-collector nil (Tuple. #^String ser-str)))))))
 
 (defn clojure-line [& [field-name]]
   (serialized-line read-string pr-str field-name))
