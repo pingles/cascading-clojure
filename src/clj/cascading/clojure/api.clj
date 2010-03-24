@@ -188,7 +188,7 @@
  ([field-names]
   (TextLine. (fields field-names) (fields field-names))))
 
-(defn json-line [& field-name]
+(defn- serialized-line [deserialize serialize field-name]
   (let [scheme-fields (fields (or field-name Fields/FIRST))]
     (proxy [Scheme] [scheme-fields scheme-fields]
       (sourceInit [tap #^JobConf conf]
@@ -198,13 +198,19 @@
           (.setOutputKeyClass Text)
           (.setOutputValueClass Text)
           (.setOutputFormat TextOutputFormat)))
-      (source [_ #^Text json-text]
-        (let [json-str (.toString json-text)]
-          (Util/coerceToTuple [(decode-json json-str)])))
+      (source [_ #^Text ser-text]
+        (let [ser-str (.toString ser-text)]
+          (Util/coerceToTuple [(deserialize ser-str)])))
       (sink [#^TupleEntry tuple-entry #^OutputCollector output-collector]
         (let [elem (Util/coerceFromTupleElem (.get tuple-entry 0))
-              json-str (encode-json elem)]
-          (.collect output-collector nil (Tuple. json-str)))))))
+              ser-str (serialize elem)]
+          (.collect output-collector nil (Tuple. ser-str)))))))
+
+(defn clojure-line [& [field-name]]
+  (serialized-line read-string pr-str field-name))
+
+(defn json-line [& [field-name]]
+  (serialized-line decode-json encode-json field-name))
 
 (defn path
   {:tag String}
