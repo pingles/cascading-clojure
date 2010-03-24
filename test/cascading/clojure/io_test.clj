@@ -14,4 +14,6 @@
   (is (= {:foo 1 :bar 2}
          (decode-json "{\"foo\":1,\"bar\":2}")))
   (is (= {:foo {:bar 1}}
-         (decode-json "{\"foo\":{\"bar\":1}}"))))
+         (decode-json "{\"foo\":{\"bar\":1}}")))
+  (is (= ["foo" {:bar 1}]
+         (decode-json "[\"foo\",{\"bar\":1}]"))))

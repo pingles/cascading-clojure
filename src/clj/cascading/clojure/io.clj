@@ -10,11 +10,15 @@
 (def encode-json
   json/generate-string)
 
-(defn keyify [m]
-  (if (map? m)
-    (reduce (fn [i [#^String k v]]
-              (assoc i (Keyword/intern k) (keyify v))) {} m)
-    m))
+(defn keyify [obj]
+  (cond
+    (map? obj)
+      (reduce (fn [i [#^String k v]]
+                (assoc i (Keyword/intern k) (keyify v))) {} obj)
+    (vector? obj)
+      (vec (map keyify obj))
+    :else
+      obj))
 
 (defn decode-json [obj]
   (keyify (json/parse-string obj)))
