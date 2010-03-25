@@ -1,11 +1,11 @@
 (ns cascading.clojure.io
-  (:import (java.io File)
-           (java.util UUID)
-           (org.apache.log4j Logger Level)
-           (clojure.lang Keyword))
-  (:use clojure.contrib.java-utils
-        clojure.contrib.duck-streams)
-  (:require [clj-json.core :as json]))
+  (:import java.io.File
+           java.util.UUID
+           clojure.lang.Keyword
+           (org.apache.log4j Logger Level))
+  (:require [clojure.contrib.java-utils :as ju]
+            [clojure.contrib.duck-streams :as ds]
+            [clj-json.core :as json]))
 
 (def encode-json
   json/generate-string)
@@ -24,7 +24,7 @@
   (keyify (json/parse-string obj)))
 
 (defn temp-path [sub-path]
-   (file (System/getProperty "java.io.tmpdir") sub-path))
+   (ju/file (System/getProperty "java.io.tmpdir") sub-path))
 
 (defn temp-dir
   "1) creates a directory in System.getProperty(\"java.io.tmpdir\")
@@ -43,7 +43,7 @@
   [bindings]
   (doseq [file (reverse (map second (partition 2 bindings)))]
     (if (.exists file)
-     (delete-file-recursively file))))
+     (ju/delete-file-recursively file))))
 
 (defmacro with-tmp-files [bindings & body]
   `(let ~bindings
@@ -57,8 +57,8 @@
   ([root lines]
    (write-lines-in root (str (uuid) ".data") lines))
   ([root filename lines]
-   (write-lines
-     (file (.getAbsolutePath root) filename) lines)))
+   (ds/write-lines
+     (ju/file (.getAbsolutePath root) filename) lines)))
 
 (def log-levels
   {:fatal Level/FATAL
