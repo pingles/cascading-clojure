@@ -9,6 +9,7 @@ import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
 import clojure.lang.IFn;
+import clojure.lang.AFn;
 import clojure.lang.ISeq;
 import clojure.lang.IteratorSeq;
 import clojure.lang.RT;
@@ -41,6 +42,19 @@ public class ClojureBuffer extends BaseOperation<Object>
     }
   }
 
+  protected static class CollectFn extends AFn implements IFn {
+    private TupleEntryCollector collector;
+
+    public CollectFn(TupleEntryCollector collector) {
+      this.collector = collector;
+    }
+
+    public Object invoke(Object obj) throws Exception {
+      this.collector.add(Util.coerceToTuple(obj));
+      return null;
+    }
+  }
+
   public ClojureBuffer(Fields fn_fields, Collection fn_spec) {
     super(fn_fields);
     this.fn_spec = fn_spec.toArray();
@@ -52,13 +66,9 @@ public class ClojureBuffer extends BaseOperation<Object>
 
   public void operate(FlowProcess flow_process, BufferCall<Object> buff_call) {
     try {
-      ISeq result_seq = RT.seq(this.fn.invoke(IteratorSeq.create(new TupleSeqConverter(buff_call.getArgumentsIterator()))));
-      TupleEntryCollector collector = buff_call.getOutputCollector();
-      while (result_seq != null) {
-         Object obj = result_seq.first();
-         collector.add(Util.coerceToTuple(obj));
-         result_seq = result_seq.next();
-      }
+      ISeq in_seq = IteratorSeq.create(new TupleSeqConverter(buff_call.getArgumentsIterator()));
+      IFn collect_fn = new CollectFn(buff_call.getOutputCollector());
+      this.fn.invoke(in_seq, collect_fn);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

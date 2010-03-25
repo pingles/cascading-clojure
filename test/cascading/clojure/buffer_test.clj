@@ -15,8 +15,8 @@
                   next-elem))]
     (reduce maxer coll)))
 
-(defn maxbuff [it]
-  (list (max-by second it)))
+(defn maxbuff [elems emit]
+  (emit (max-by second elems)))
 
 (deftest buffer-max-for-each-group
   (test-flow
@@ -27,11 +27,10 @@
                (c/buffer #'maxbuff)))
     [["bar" 3] ["bat" 7]]))
 
-;;Note that you can not walk the tuple iterator more than once
-;;but you can hold on to the seq and walk that more than once.
-(defn maxpairs [it]
-  (let [biggest (max-by second it)]
-    (map #(concat % biggest) (remove #(= % biggest) it))))
+(defn maxpairs [elems emit]
+  (let [biggest (max-by second elems)]
+    (doseq [other (remove #(= % biggest) elems)]
+      (emit (concat other biggest)))))
 
 (deftest buffer-max-and-pair
   (test-flow

@@ -63,16 +63,16 @@
     (.cleanup  a fp-null ag-call)
     (op-call-results ag-call)))
 
-(defn invoke-buffer [a colls]
-  (let [a       (roundtrip a)
-        ag-call (op-call)
+(defn invoke-buffer [buff colls]
+  (let [buff      (roundtrip buff)
+        buff-call (op-call)
         fp-null FlowProcess/NULL]
-    (.prepare a fp-null ag-call)
-    (.setArgumentsIterator ag-call
+    (.prepare buff fp-null buff-call)
+    (.setArgumentsIterator buff-call
       (.iterator (map #(TupleEntry. (Util/coerceToTuple %)) colls)))
-    (.operate a fp-null ag-call)
-    (.cleanup a fp-null ag-call)
-    (op-call-results ag-call)))
+    (.operate buff fp-null buff-call)
+    (.cleanup buff fp-null buff-call)
+    (op-call-results buff-call)))
 
 (defn- deserialize-tuple [line]
   (read-string line))

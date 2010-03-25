@@ -97,13 +97,10 @@
   (let [a (ClojureAggregator. (p/fields "sum") (p/parse-fn-spec #'sum))]
     (is (= [[6]] (t/invoke-aggregator a [[1] [2] [3]])))))
 
-(defn buff [it]
-  (for [x it]
-    [(apply + 1 x)]))
+(defn buff [elems emit]
+  (doseq [[x] elems]
+    (emit (inc x))))
 
-; TODO: notice Buffer exects a fn that takes an iterator and returns a seq of
-; tuples. if we want to return only a single tuple, then we need to wrap the
-; tuple in a seq.
 (deftest test-clojure-buffer
-  (let [a (ClojureBuffer. (p/fields "sum") (p/parse-fn-spec #'buff))]
-    (is (= [[2][3][4]] (t/invoke-buffer a [[1] [2] [3]])))))
+  (let [b (ClojureBuffer. (p/fields "sum") (p/parse-fn-spec #'buff))]
+    (is (= [[2][3][4]] (t/invoke-buffer b [[1] [2] [3]])))))
