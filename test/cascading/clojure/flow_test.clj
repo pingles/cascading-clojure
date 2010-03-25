@@ -11,7 +11,6 @@
   (:require [cascading.clojure.api :as c]))
 
 (defn uppercase
-  {:fn> "upword"}
   [word]
   (.toUpperCase word))
 
@@ -30,7 +29,6 @@
    [[5] [10]]))
 
 (defn extract-key
-  {:fn> "key"}
   [val]
   (second (re-find #".*\((.*)\).*" val)))
 
@@ -38,7 +36,7 @@
   (test-flow
    (in-pipes ["val" "num"])
    (in-tuples [["foo(bar)bat" 1] ["biz(ban)hat" 2]])
-   (fn [in] (-> in (c/map #'extract-key :< "val" :> ["key" "num"])))
+   (fn [in] (-> in (c/map #'extract-key :< "val" :fn> "key" :> ["key" "num"])))
    [["bar" 1] ["ban" 2]]))
 
 (def sum (c/agg + 0))

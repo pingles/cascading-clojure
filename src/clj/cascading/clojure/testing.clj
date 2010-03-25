@@ -74,16 +74,7 @@
     (.cleanup buff fp-null buff-call)
     (op-call-results buff-call)))
 
-(defn- deserialize-tuple [line]
-  (read-string line))
-
-(defn- serialize-tuple
-  {:fn> "line"}
-  [tuple]
-  (pr-str tuple))
-
 (defn- serialize-vals
-  {:fn> "line"}
   [& vals]
   (pr-str (vec vals)))
 
@@ -96,7 +87,7 @@
 
 (defn in-pipe [in-label in-fields]
   (-> (c/pipe in-label)
-    (c/map #'deserialize-tuple :fn> in-fields)))
+    (c/map #'read-string :fn> in-fields)))
 
 (defn in-pipes [fields-spec]
   (if (not (map? fields-spec))
@@ -116,10 +107,10 @@
                      sink-path       (temp-path "sink")]
       (doseq [[in-label in-tuples] in-tuples-spec]
         (write-lines-in source-dir-path in-label
-          (map serialize-tuple in-tuples)))
+          (map pr-str in-tuples)))
       (let [assembly       (-> in-pipes-spec
                              assembler
-                             (c/map #'serialize-vals))
+                             (c/map #'serialize-vals :fn> "line"))
             source-tap-map (mash (fn [[in-label _]]
                                    [in-label
                                     (c/lfs-tap (c/text-line "line")

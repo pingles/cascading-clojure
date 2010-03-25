@@ -53,9 +53,6 @@
   [arr]
   (let [[fn-var-or-coll & opts] arr
 	      [fn-var fn-spec] (parse-fn-spec* fn-var-or-coll)
-	      raw              (merge
-	                         opt-defaults
-	                         (select-keys (meta fn-var) [:fn>])
-	                         (apply hash-map opts))
+	      raw              (merge opt-defaults (apply hash-map opts))
 	      as-fields        (map-vals fields raw)]
 	  (assoc as-fields :fn-spec fn-spec)))

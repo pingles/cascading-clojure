@@ -6,11 +6,6 @@
 (defn example [x]
   x)
 
-(defn meta-example
-  {:fn> "foo"}
-  [x]
-  x)
-
 (deftest test-fields
   (is (= (Fields. (into-array String ["foo"]))
     (fields "foo")))
@@ -63,10 +58,3 @@
 	        :fn>     Fields/ARGS
 	        :>       Fields/RESULTS}
     (parse-args [#'example]))))
-
-(deftest test-parse-fn-spec-meta-fn-fields
-  (is (= {:fn-spec ["cascading.clojure.parse-test" "meta-example"]
-          :<       Fields/ALL
-	        :fn>     (fields "foo")
-	        :>       Fields/RESULTS}
-    (parse-args [#'meta-example]))))
