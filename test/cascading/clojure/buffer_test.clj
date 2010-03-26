@@ -16,7 +16,7 @@
     (reduce maxer coll)))
 
 (defn maxbuff [elems emit]
-  (emit (max-by second elems)))
+  (emit (max-by second (iterator-seq elems))))
 
 (deftest buffer-max-for-each-group
   (test-flow
@@ -28,8 +28,9 @@
     [["bar" 3] ["bat" 7]]))
 
 (defn maxpairs [elems emit]
-  (let [biggest (max-by second elems)]
-    (doseq [other (remove #(= % biggest) elems)]
+  (let [elems-seq (iterator-seq elems)
+	biggest (max-by second elems-seq)]
+    (doseq [other (remove #(= % biggest) elems-seq)]
       (emit (concat other biggest)))))
 
 (deftest buffer-max-and-pair

@@ -66,9 +66,9 @@ public class ClojureBuffer extends BaseOperation<Object>
 
   public void operate(FlowProcess flow_process, BufferCall<Object> buff_call) {
     try {
-      ISeq in_seq = IteratorSeq.create(new TupleSeqConverter(buff_call.getArgumentsIterator()));
+      TupleSeqConverter in_iter = new TupleSeqConverter(buff_call.getArgumentsIterator());
       IFn collect_fn = new CollectFn(buff_call.getOutputCollector());
-      this.fn.invoke(in_seq, collect_fn);
+      this.fn.invoke(in_iter, collect_fn);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

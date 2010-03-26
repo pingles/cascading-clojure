@@ -98,7 +98,7 @@
     (is (= [[6]] (t/invoke-aggregator a [[1] [2] [3]])))))
 
 (defn buff [elems emit]
-  (doseq [[x] elems]
+  (doseq [[x] (iterator-seq elems)]
     (emit (inc x))))
 
 (deftest test-clojure-buffer
