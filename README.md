@@ -33,4 +33,4 @@ Note that if you edit either `api.clj` or `testing.clj`, you should `lein compil
 
 - Write tests.
 
-- Copyright (c) Bradford Cross and Mark McGranahan released under the MIT License (http://www.opensource.org/licenses/mit-license.php).
+- Copyright (c) Bradford Cross and Mark McGranahan released under the GPL License (http://www.opensource.org/licenses/gpl-3.0.php).
