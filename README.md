@@ -23,7 +23,7 @@ Note that if you edit either `api.clj` or `testing.clj`, you should `lein compil
 
 - Conciseness, but not at the expense of expressiveness, explicitness, abstraction, and composability.
 
-- Simple and explict functional sytle over macros and elaborate DSLs.
+- Simple and explicit functional style over macros and elaborate DSLs.
 
 - Functional parameterization over vars and binding.
 
@@ -33,4 +33,4 @@ Note that if you edit either `api.clj` or `testing.clj`, you should `lein compil
 
 - Write tests.
 
-- Copyright (c) Bradford Cross and Mark McGranahan released under the GPL License (http://www.opensource.org/licenses/gpl-3.0.php).
+- Copyright (c) Bradford Cross and Mark McGranaghan released under the GPL License (http://www.opensource.org/licenses/gpl-3.0.php).
