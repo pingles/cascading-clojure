@@ -1,25 +1,23 @@
-# cascading-clojure
-## An idiomatic Clojure wrapper for [Cascading](http://cascading.org).
+# `cascading-clojure`
 
-cascading-clojure wraps much of the verbose java plumbing but preserves the spirit of the cascading API.
+An idiomatic Clojure wrapper for [Cascading](http://cascading.org).
 
-It handles serializing and deserailizing all data between clojure function calss injected into individual Cascading operators, as well as allowing arbitrary dynmaic Fields in Cascading Tuples via Clojure maps.
+`cascading-clojure` wraps much of the verbose Java plumbing but preserves the spirit of the Cascading API.
 
-[TODO: need examples]
+It handles serializing and deserailizing all data between Clojure function calls injected into individual Cascading operators, as well as allowing arbitrary dynamic Fields in Cascading Tuples via Clojure maps.
 
 ## Hacking
 
-Get [Leiningen](http://github.com/technomancy/leiningen) 1.1.0.
+Get [Leiningen](http://github.com/technomancy/leiningen) 1.3.0 or later.
 
     $ lein deps
-    $ lein compile-java
+    $ lein javac
     $ lein compile
     $ lein test
 
 Note that if you edit either `api.clj` or `testing.clj`, you should `lein compile` before running again.
 
-
-## cascading-clojure is part of clj-sys http://github.com/clj-sys
+## `cascading-clojure` is part of [`clj-sys`](http://github.com/clj-sys)
 
 - Conciseness, but not at the expense of expressiveness, explicitness, abstraction, and composability.
 
