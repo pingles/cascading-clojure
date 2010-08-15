@@ -2,14 +2,14 @@
   :source-path "src/clj"
   :java-source-path "src/jvm"
   :java-fork "true"
-  :dependencies [[org.clojure/clojure "1.1.0"]
-                 [org.clojure/clojure-contrib "1.1.0"]
-                 [cascading/cascading "1.0.17-SNAPSHOT"
-                   :exclusions [javax.mail/mail janino/janino]]
-                 [clj-json "0.3.0-SNAPSHOT"]
-                 [clj-serializer "0.1.0"]]
-  :dev-dependencies [[org.clojars.mmcgrana/lein-javac "0.1.0"]
-                     [lein-clojars "0.5.0"]
-                     [swank-clojure "1.1.0"]]
-  :namespaces [cascading.clojure.api
-               cascading.clojure.testing])
+  :dependencies
+    [[org.clojure/clojure "1.2.0-RC3"]
+     [org.clojure/clojure-contrib "1.2.0-RC3"]
+     [cascading "1.0.17-SNAPSHOT" :exclusions [javax.mail/mail janino/janino]]
+     [clj-json "0.3.0-SNAPSHOT"]
+     [clj-serializer "0.1.1"]]
+  :dev-dependencies
+    [[lein-javac "1.2.1-SNAPSHOT"]]
+  :namespaces
+    [cascading.clojure.api
+     cascading.clojure.testing])

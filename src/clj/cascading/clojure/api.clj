@@ -1,5 +1,5 @@
 (ns cascading.clojure.api
-  (:refer-clojure :exclude (count first last filter mapcat map))
+  (:refer-clojure :exclude (count first last filter mapcat map group-by))
   (:use [clojure.contrib.seq-utils :only (find-first indexed)])
   (:use [cascading.clojure.io :only (decode-json encode-json)])
   (:use cascading.clojure.parse)
