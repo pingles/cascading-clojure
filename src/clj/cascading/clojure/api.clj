@@ -5,6 +5,7 @@
   (:use cascading.clojure.parse)
   (:import (cascading.tuple Tuple TupleEntry Fields)
            (cascading.scheme TextLine)
+           (cascading.clojure TaggedInputFormat)
            (cascading.flow Flow FlowConnector)
            (cascading.operation Identity)
            (cascading.operation.filter Limit)
@@ -187,6 +188,26 @@
   (TextLine. Fields/FIRST))
  ([field-names]
   (TextLine. (fields field-names) (fields field-names))))
+
+(defn tagged-input [start-tag end-tag deserialize serialize field-name]
+  (let [scheme-fields (fields (or field-name Fields/FIRST))]
+    (proxy [Scheme] [scheme-fields scheme-fields]
+      (sourceInit [tap #^JobConf conf]
+                  (.set conf "taginput.start" start-tag)
+                  (.set conf "taginput.end" end-tag)
+                  (.setInputFormat conf TaggedInputFormat))
+      (sinkInit [tap #^JobConf conf]
+                (doto conf
+                  (.setOutputKeyClass Text)
+                  (.setOutputValueClass Text)
+                  (.setOutputFormat TextOutputFormat)))
+      (source [_ #^Text ser-text]
+              (let [ser-str (.toString ser-text)]
+                (Util/coerceToTuple [(deserialize ser-str)])))
+      (sink [#^TupleEntry tuple-entry #^OutputCollector output-collector]
+            (let [elem (Util/coerceFromTupleElem (.get tuple-entry 0))
+                  ser-str (serialize elem)]
+              (.collect output-collector nil (Tuple. #^String ser-str)))))))
 
 (defn- serialized-line [deserialize serialize field-name]
   (let [scheme-fields (fields (or field-name Fields/FIRST))]
