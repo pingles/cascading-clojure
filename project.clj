@@ -8,8 +8,6 @@
      [cascading "1.0.17-SNAPSHOT" :exclusions [javax.mail/mail janino/janino]]
      [clj-json "0.3.1"]
      [clj-serializer "0.1.1"]]
-  :dev-dependencies
-    [[lein-javac "1.2.1-SNAPSHOT"]]
   :aot
     [cascading.clojure.api
      cascading.clojure.testing])
